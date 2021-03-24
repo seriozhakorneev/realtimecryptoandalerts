@@ -1,0 +1,46 @@
+<!doctype html>
+<title>Dynamic Update</title>
+<script type="text/javascript"
+  src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript">
+  var $SCRIPT_ROOT = window.location;
+</script>
+
+<script type="text/javascript">
+    var intervalID = setInterval(update_values,1000);
+    
+      function update_values() {
+            $.getJSON($SCRIPT_ROOT + 'data',
+                   
+          function(data) {
+            $('#result').text(data.result);
+            $('#num10').text(data.num10);
+            $('#num100').text(data.num100);
+            console.log(data)
+          });
+    
+    
+          
+        };
+       
+        function stopTextColor() {
+          clearInterval(intervalID);
+        }
+        
+    </script>
+    
+    <body onload="update_values();">
+    <h1>Dynamic Update</h1>
+    
+        <h2 style="color:blueviolet" id="result">none</h2>
+        <h2 style="color:red" id="num10">none</h2>
+        <h2 style="color:yellowgreen" id="num100">none</h2>
+            
+    <script>
+    document.getElementById("result").innerHTML;
+    document.getElementById("num10").innerHTML;
+    document.getElementById("num100").innerHTML;
+    </script>
+    
+        <button onclick="stopTextColor();">Stop</button>
+        </body>
