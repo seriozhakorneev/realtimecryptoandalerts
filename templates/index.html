@@ -7,7 +7,7 @@
 </script>
 
 <script type="text/javascript">
-    var intervalID = setInterval(update_values,1000);
+    var intervalID = setInterval(update_values,3000);
     
       function update_values() {
             $.getJSON($SCRIPT_ROOT + 'data',
@@ -31,6 +31,9 @@
     
     <body onload="update_values();">
     <h1>Dynamic Update</h1>
+    {% if request.cookies.get('tokens') %}
+      <h2>{{ request.cookies.get('tokens') }}</h2>
+    {% endif %}
     
         <h2 style="color:blueviolet" id="result">none</h2>
         <h2 style="color:red" id="num10">none</h2>
@@ -43,4 +46,12 @@
     </script>
     
         <button onclick="stopTextColor();">Stop</button>
+        <form action="{{ url_for('create_cookie') }}" method="POST" >
+          <button type="submit" value="create">create</button>
+        </form>
+
+        <form action="{{ url_for('delete_cookie') }}" method="POST" >
+          <button type="submit" value="delete">delete</button>
+        </form>
+        
         </body>

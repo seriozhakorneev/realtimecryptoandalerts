@@ -1,4 +1,7 @@
+#from io import open_code
 import requests
+import json
+
 # заменить на реквест с фаст апи, должен быть
 
 def get_response():
@@ -8,13 +11,27 @@ def get_response():
 		response = r.json()
 	else:
 		response = None
-
 	return response
 
-resp = get_response()
-print(len(resp))
 
-for pair in resp:
-    if pair.get('symbol') == 'BTCUSDT':
-        print(pair.get('symbol'))
-        print(pair.get('price'))
+def write_json_file():
+
+	resp = get_response()
+	if resp:
+
+		try:
+			with open('tokens.json', 'w') as tokens_file:
+				json.dump(resp, tokens_file)
+		except Exception:
+			pass
+
+
+async def read_json_file():
+
+	with open('tokens.json', 'r') as tokens_file:
+		try:
+			tokens = json.load(tokens_file)
+		except Exception:
+			tokens = None
+	
+	return tokens
