@@ -1,8 +1,6 @@
-#from io import open_code
 import requests
 import json
 
-# заменить на реквест с фаст апи, должен быть
 
 def get_response():
 	r = requests.get('https://api.binance.com/api/v3/ticker/price')
@@ -15,23 +13,26 @@ def get_response():
 
 
 def write_json_file():
+	response = get_response()
+	if response:
 
-	resp = get_response()
-	if resp:
+		# делаем дикт пара:цена для удобства
+		pairs_dict = {}
+		for pair in response:
+			pairs_dict[pair['symbol']] = pair['price']
 
 		try:
-			with open('tokens.json', 'w') as tokens_file:
-				json.dump(resp, tokens_file)
+			with open('trade_pairs.json', 'w') as file:
+				json.dump(pairs_dict, file)
 		except Exception:
 			pass
 
 
 async def read_json_file():
-
-	with open('tokens.json', 'r') as tokens_file:
+	with open('trade_pairs.json', 'r') as file:
 		try:
-			tokens = json.load(tokens_file)
+			pairs = json.load(file)
 		except Exception:
-			tokens = None
+			pairs = None
 	
-	return tokens
+	return pairs
