@@ -146,7 +146,7 @@ async def delete_pair(request: Request, trade_pair: str = Form(...)):
 
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", reload=True)# reload=True
+    uvicorn.run("app:app")# reload=True
 
 
 # how much cookie i can put in key
