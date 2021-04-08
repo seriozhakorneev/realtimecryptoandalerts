@@ -18,7 +18,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def control_cookie_size(cookie_string):
     # return True if cookies 
     # reached their limit(4kb)
-    return len(cookie_string.encode('utf-8')) > 4000
+    if cookie_string:
+        return len(cookie_string.encode('utf-8')) > 4000
+
+    return False
 
 async def check_alerts(alerts_dict, price, s_pair):
     # return alert and change alert_values
