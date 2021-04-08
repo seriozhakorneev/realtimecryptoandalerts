@@ -180,6 +180,7 @@ async def add_alert(
 async def delete_pair(request: Request, trade_pair: str = Form(...)):
     
     session_pairs = request.cookies.get('pairs')
+    alerts_dict = {}
 
     if session_pairs:
         session_pairs_list = session_pairs.split(" ")
