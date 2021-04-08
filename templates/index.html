@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Update</title>
+  <title>Crypto&Alerts</title>
   <link rel="stylesheet" href="{{ url_for('static', path='style/css/bootstrap.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', path='style/css/custom.min.css') }}">
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
@@ -15,7 +15,6 @@
   <div class="container">
     <div class="tab-pane active" id="home">
       <div class="container bootstrap snippets bootdey">
-
         <div class="row">
           {% if session_pairs_list %}
           {% for pair in session_pairs_list %}
@@ -26,17 +25,77 @@
                 <input type="hidden" name="trade_pair" value="{{ pair }}">
                 <button style="font-size: 29px" type="submit" class="close text-dark">&times;</button>
               </form>
-              <h5 style="color: #060606;" class="alert-heading text-warning"><strong>{{ pair }}</strong></h5>
+              <h5 class="alert-heading text-warning"><strong>{{ pair }}</strong></h5>
               <p style="font-size: 20px;" id="price{{ loop.index - 1 }}">x</p>
+              <button style="font-size: 23px; margin: 40px -2px ;"
+              data-toggle="modal" data-target="#{{ pair }}" class="close text-dark">&#x2699;</button>
             </div>
           </div>
           {% endfor %}
           {% endif %}
         </div>
-
       </div>
     </div>
 
+    <!--Modals-->
+    {% if session_pairs_list %}
+    {% for pair in session_pairs_list %}
+      <div id="{{ pair }}" class="modal fade">
+        <div class="modal-dialog modal-sm">
+          <div class="modal-content lead">
+            <div class="modal-body">
+              <button style="font-size: 29px" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              <h5 class="modal-title text-center text-warning" style="font-size:35px;"><strong>{{ pair }}</strong></h5>
+              <h5 class="modal-title text-center" style="font-size:35px;" id="modalprice{{ loop.index - 1 }}">x</h5>
+
+              {% set alerts = alerts_dict.get(pair) %}
+              {% if alerts %}
+              
+              <form action="{{ url_for('delete_alert') }}" method="POST">
+              <input type="hidden" name="trade_pair" value="{{ pair }}">
+                {% if alerts[0] %}
+                <button style="margin: 5px 55px;" type="submit" name="alert_index" value="0" class="btn btn-outline-success">
+                  {{ "%.8f"|format(alerts[0]) }}
+                </button>
+                {% endif %}
+
+                {% if alerts[1] %}
+                <button style="margin: 5px 55px;" type="submit" name="alert_index" value="1" class="btn btn-outline-danger">
+                  {{ "%.8f"|format(alerts[1]) }}
+                </button>
+                {% endif %}
+              </form>
+              {% endif %}
+
+              <form method="POST" action="{{ url_for('add_alert') }}">
+                <input type="hidden" name="trade_pair" value="{{ pair }}">
+                <fieldset class="form-group">
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="direction" value="up" checked="">
+                        <span style="color: lightgreen;">&#8639;</span>upstream alert
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="direction" value="down">
+                        <span style="color: red;">&#8643;</span>downward alert
+                    </label>
+                  </div>
+                </fieldset>
+                <div class="input-group mb-3">
+                  <input name="alert_val" class="form-control form-control-sm" min="0.00000001" step="any" type="number" required>
+                </div>
+                  <input style="margin-left: 90px;" type="submit" value="Set Alert" class="btn btn-secondary">
+              </form>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    {% endif %}
+    <!--end modals-->
     
     <footer id="footer">
       <div class="row">
@@ -77,21 +136,35 @@
           {% if session_pairs_list %}
             {% for pair in session_pairs_list %}
               $('#price{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}]);
+              $('#modalprice{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}]);
             {% endfor %}
           {% endif %}
 
+          
           // notification if alert
-          if(data.raise_alert[0] != null)
+          if(data.raise_alert[0] != null){
           var notification = new Notification(data.raise_alert[0] + '  Reached ' + data.raise_alert[1]);
-          else
-          var notification = 123;
-    
-          function clickFunc() { alert(data.raise_alert[0] + '  REACHED ' + data.raise_alert[1]); }
+          function clickFunc() { 
+            window.focus();
+            alert(data.raise_alert[0] + '  REACHED ' + data.raise_alert[1]);
+            location.reload();
+          }
           notification.onclick = clickFunc;
+          
+          //notification.onclick = function () {
+          //  window.focus();
+         // }
+          }
+          
+
+          
 
           console.log(data)
         });
       };
+
+      
+
       function stopTextColor() {
         clearInterval(intervalID);
       }
