@@ -189,11 +189,11 @@ async def delete_pair(request: Request, trade_pair: str = Form(...)):
         alerts = request.cookies.get('alerts')
         if alerts:
             alerts_dict = literal_eval(alerts)
-       
-        values = alerts_dict.get(trade_pair)
-        if values:
-            # delete alert pair 
-            del alerts_dict[trade_pair]
+
+            values = alerts_dict.get(trade_pair)
+            if values:
+                # delete alert pair 
+                del alerts_dict[trade_pair]
 
         redirect_resp = RedirectResponse('/', status_code=303)
         session_pairs_string = ' '.join(session_pairs_list)
