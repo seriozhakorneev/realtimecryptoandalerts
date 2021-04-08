@@ -23,7 +23,7 @@ def control_cookie_size(cookie_string):
 
     return False
 
-async def check_alerts(alerts_dict, price, s_pair):
+def check_alerts(alerts_dict, price, s_pair):
     # return alert and change alert_values
     alert_values = alerts_dict[s_pair]
 
@@ -97,7 +97,7 @@ async def data(request: Request,response: Response,):
             if alerts:
                 alerts_dict = literal_eval(alerts)
                 if s_pair in alerts_dict.keys():
-                    raise_alert = await check_alerts(alerts_dict, price, s_pair)
+                    raise_alert = check_alerts(alerts_dict, price, s_pair)
 
                     # if alert raised, change cookie
                     if raise_alert[0]:
