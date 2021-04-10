@@ -50,17 +50,16 @@
 
               {% set alerts = alerts_dict.get(pair) %}
               {% if alerts %}
-              
               <form action="{{ url_for('delete_alert') }}" method="POST">
               <input type="hidden" name="trade_pair" value="{{ pair }}">
                 {% if alerts[0] %}
-                <button style="margin: 5px 55px;" type="submit" name="alert_index" value="0" class="btn btn-outline-success">
+                <button style="margin: 5px 55px;" type="submit" name="alert_index" value="0" class="btn btn-outline-success" title="Click to delete">
                   {{ "%.8f"|format(alerts[0]) }}
                 </button>
                 {% endif %}
 
                 {% if alerts[1] %}
-                <button style="margin: 5px 55px;" type="submit" name="alert_index" value="1" class="btn btn-outline-danger">
+                <button style="margin: 5px 55px;" type="submit" name="alert_index" value="1" class="btn btn-outline-danger" title="Click to delete">
                   {{ "%.8f"|format(alerts[1]) }}
                 </button>
                 {% endif %}
@@ -108,9 +107,8 @@
                 </div>
               </form>
             </div>
-          <p>Made by <a href="https://thomaspark.co/">Thomas Park</a>.</p>
-          <p>Code released under the <a href="https://github.com/thomaspark/bootswatch/blob/master/LICENSE">MIT License</a>.</p>
-          <p>Based on <a href="https://getbootstrap.com/" rel="nofollow">Bootstrap</a>. Icons from <a href="https://fontawesome.com/" rel="nofollow">Font Awesome</a>. Web fonts from <a href="https://fonts.google.com/" rel="nofollow">Google</a>.</p>
+          <p>Page uses cookies files</a></p>
+          <p>Enable browser notifications, to receive alerts</p>
         </div>
       </div>
     </footer>
@@ -150,15 +148,8 @@
             location.reload();
           }
           notification.onclick = clickFunc;
-          
-          //notification.onclick = function () {
-          //  window.focus();
-         // }
           }
-          
-
-          
-
+      
           console.log(data)
         });
       };

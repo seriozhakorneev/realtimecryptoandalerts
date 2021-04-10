@@ -14,7 +14,7 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# help functions
+# functions
 def control_cookie_size(cookie_string):
     # return True if cookies 
     # reached their limit(4kb)
@@ -180,7 +180,7 @@ async def add_alert(
 async def delete_pair(request: Request, trade_pair: str = Form(...)):
     
     session_pairs = request.cookies.get('pairs')
-    alerts_dict = {}
+    redirect_resp = RedirectResponse('/', status_code=303)
 
     if session_pairs:
         session_pairs_list = session_pairs.split(" ")
@@ -195,11 +195,16 @@ async def delete_pair(request: Request, trade_pair: str = Form(...)):
             if values:
                 # delete alert pair 
                 del alerts_dict[trade_pair]
+            
+                redirect_resp.set_cookie(
+                    key="alerts",
+                    value=str(alerts_dict),
+                    expires=1209600)
 
-        redirect_resp = RedirectResponse('/', status_code=303)
+        
         session_pairs_string = ' '.join(session_pairs_list)
         redirect_resp.set_cookie(key="pairs", value=session_pairs_string, expires=1209600)
-        redirect_resp.set_cookie(key="alerts", value=str(alerts_dict), expires=1209600)
+        
     return redirect_resp
 
 
@@ -229,4 +234,4 @@ async def delete_alert(
     return redirect_resp
 
 if __name__ == "__main__":
-    uvicorn.run("app:app")# reload=True
+    uvicorn.run("app:app")
