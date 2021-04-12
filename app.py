@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, Form, Response
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi_utils.tasks import repeat_every
 from fastapi.staticfiles import StaticFiles
 
@@ -77,6 +77,14 @@ async def home(request: Request):
         "p_names": p_names,
         })
 
+
+@app.get("/notes", response_class=HTMLResponse)
+async def notes(request: Request):
+    return templates.TemplateResponse("notes.html", {"request": request})
+
+@app.get("/sw.js")
+async def sw():
+    return FileResponse('templates/sw.js', media_type='application/javascript')
 
 @app.get('/data')
 async def data(request: Request,response: Response,):
@@ -234,4 +242,4 @@ async def delete_alert(
     return redirect_resp
 
 if __name__ == "__main__":
-    uvicorn.run("app:app")
+    uvicorn.run("app:app", reload=True)# reload=True

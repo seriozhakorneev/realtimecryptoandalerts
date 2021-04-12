@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="showNotification()">click</button>
+
+    <script>
+
+
+        navigator.serviceWorker.register('sw.js');
+        function showNotification() {
+            Notification.requestPermission(function(result) {
+                if (result === 'granted') {
+                navigator.serviceWorker.ready.then(function(registration) {
+                    registration.showNotification('Vibration Sample', {
+                    body: 'Buzz! Buzz!',
+                    vibrate: [200, 100, 200, 100, 200, 100, 200],
+                    tag: 'vibration-sample'
+                    });
+                });
+                }
+            });
+            }
+    </script>
+</body>
+</html>
+
