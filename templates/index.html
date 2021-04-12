@@ -122,9 +122,8 @@
 <script type="text/javascript">
   var intervalID = setInterval(update_values,1000);
 
-  Notification.requestPermission(function(permission){
-    // переменная permission содержит результат запроса
-    console.log('Результат запроса прав:', permission);
+  navigator.serviceWorker.register('sw.js');
+  Notification.requestPermission(function(result){
     });
   
     function update_values() {
@@ -141,17 +140,24 @@
           
           // notification if alert
           if(data.raise_alert[0] != null){
-          var notification = new Notification(data.raise_alert[0] + '  Reached ' + data.raise_alert[1]);
-          function clickFunc() { 
-            window.focus();
-            alert(data.raise_alert[0] + '  REACHED ' + data.raise_alert[1]);
+            showNotification();
             location.reload();
-          }
-          notification.onclick = clickFunc;
-          }
+            }
 
+          function showNotification() {
+              Notification.requestPermission(function(result) {
+                  if (result === 'granted') {
+                  navigator.serviceWorker.ready.then(function(registration) {
+                      registration.showNotification(data.raise_alert[0] + '  REACHED ' + data.raise_alert[1], {
+                      vibrate: [200, 100, 200, 100, 200, 100, 200],
+                      tag: data.raise_alert[1],
+                      });
+                  });
+                  }
+              });
+            }         
       
-          console.log(data)
+         // console.log(data)
         });
       };
 

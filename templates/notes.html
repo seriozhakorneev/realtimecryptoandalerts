@@ -11,6 +11,8 @@
 
     <script>
 
+        
+
 
         navigator.serviceWorker.register('sw.js');
         function showNotification() {
@@ -26,7 +28,48 @@
                 }
             });
             }
+            
     </script>
+    <script type="text/javascript">
+        var intervalID = setInterval(update_values,1000);
+      
+        Notification.requestPermission(function(permission){
+          // переменная permission содержит результат запроса
+          console.log('Результат запроса прав:', permission);
+          });
+        
+          function update_values() {
+                $.getJSON($SCRIPT_ROOT + 'data',
+                        
+              function(data) {
+                {% if session_pairs_list %}
+                  {% for pair in session_pairs_list %}
+                    $('#price{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}]);
+                    $('#modalprice{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}]);
+                  {% endfor %}
+                {% endif %}
+      
+                
+                // notification if alert
+                if(data.raise_alert[0] != null){
+                var notification = new Notification(data.raise_alert[0] + '  Reached ' + data.raise_alert[1]);
+                function clickFunc() { 
+                  window.focus();
+                  alert(data.raise_alert[0] + '  REACHED ' + data.raise_alert[1]);
+                  location.reload();
+                }
+                notification.onclick = clickFunc;
+                }
+      
+            
+                console.log(data)
+              });
+            };
+      
+            function stopTextColor() {
+              clearInterval(intervalID);
+            }
+        </script>
 </body>
 </html>
 

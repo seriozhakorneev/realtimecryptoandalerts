@@ -118,7 +118,7 @@ async def data(request: Request,response: Response,):
                             value=str(alerts_dict),
                             expires=1209600)
                             # 2 weeks in seconds
-    
+    #raise_alert = 'asd', '432'
     return {
          'result': result,
          'raise_alert': raise_alert,
