@@ -78,13 +78,11 @@ async def home(request: Request):
         })
 
 
-@app.get("/notes", response_class=HTMLResponse)
-async def notes(request: Request):
-    return templates.TemplateResponse("notes.html", {"request": request})
-
 @app.get("/sw.js")
 async def sw():
+    # sw.js file for Service Worker
     return FileResponse('templates/sw.js', media_type='application/javascript')
+
 
 @app.get('/data')
 async def data(request: Request,response: Response,):
@@ -118,7 +116,6 @@ async def data(request: Request,response: Response,):
                             value=str(alerts_dict),
                             expires=1209600)
                             # 2 weeks in seconds
-    #raise_alert = 'asd', '432'
     return {
          'result': result,
          'raise_alert': raise_alert,
@@ -242,4 +239,4 @@ async def delete_alert(
     return redirect_resp
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", reload=True)# reload=True
+    uvicorn.run("app:app")# reload=True

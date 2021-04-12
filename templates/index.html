@@ -40,58 +40,58 @@
     <!--Modals-->
     {% if session_pairs_list %}
     {% for pair in session_pairs_list %}
-      <div id="{{ pair }}" class="modal fade">
-        <div class="modal-dialog modal-sm">
-          <div class="modal-content lead">
-            <div class="modal-body">
-              <button style="font-size: 29px" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-              <h5 class="modal-title text-center text-warning" style="font-size:35px;"><strong>{{ pair }}</strong></h5>
-              <h5 class="modal-title text-center" style="font-size:35px;" id="modalprice{{ loop.index - 1 }}">x</h5>
+    <div id="{{ pair }}" class="modal fade">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content lead">
+          <div class="modal-body">
+            <button style="font-size: 29px" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h5 class="modal-title text-center text-warning" style="font-size:35px;"><strong>{{ pair }}</strong></h5>
+            <h5 class="modal-title text-center" style="font-size:35px;" id="modalprice{{ loop.index - 1 }}">x</h5>
 
-              {% set alerts = alerts_dict.get(pair) %}
-              {% if alerts %}
-              <form action="{{ url_for('delete_alert') }}" method="POST">
-              <input type="hidden" name="trade_pair" value="{{ pair }}">
-                {% if alerts[0] %}
-                <button style="margin: 5px 55px;" type="submit" name="alert_index" value="0" class="btn btn-outline-success" title="Click to delete">
-                  {{ "%.8f"|format(alerts[0]) }}
-                </button>
-                {% endif %}
-
-                {% if alerts[1] %}
-                <button style="margin: 5px 55px;" type="submit" name="alert_index" value="1" class="btn btn-outline-danger" title="Click to delete">
-                  {{ "%.8f"|format(alerts[1]) }}
-                </button>
-                {% endif %}
-              </form>
+            {% set alerts = alerts_dict.get(pair) %}
+            {% if alerts %}
+            <form action="{{ url_for('delete_alert') }}" method="POST">
+            <input type="hidden" name="trade_pair" value="{{ pair }}">
+              {% if alerts[0] %}
+              <button style="margin: 5px 55px;" type="submit" name="alert_index" value="0" class="btn btn-outline-success" title="Click to delete">
+                {{ "%.8f"|format(alerts[0]) }}
+              </button>
               {% endif %}
 
-              <form method="POST" action="{{ url_for('add_alert') }}">
-                <input type="hidden" name="trade_pair" value="{{ pair }}">
-                <fieldset class="form-group">
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="direction" value="up" checked="">
-                        <span style="color: lightgreen;">&#8639;</span>upstream alert
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="direction" value="down">
-                        <span style="color: red;">&#8643;</span>downward alert
-                    </label>
-                  </div>
-                </fieldset>
-                <div class="input-group mb-3">
-                  <input name="alert_val" class="form-control form-control-sm" min="0.00000001" step="any" type="number" required>
-                </div>
-                  <input style="margin-left: 90px;" type="submit" value="Set Alert" class="btn btn-secondary">
-              </form>
+              {% if alerts[1] %}
+              <button style="margin: 5px 55px;" type="submit" name="alert_index" value="1" class="btn btn-outline-danger" title="Click to delete">
+                {{ "%.8f"|format(alerts[1]) }}
+              </button>
+              {% endif %}
+            </form>
+            {% endif %}
 
-            </div>
+            <form method="POST" action="{{ url_for('add_alert') }}">
+              <input type="hidden" name="trade_pair" value="{{ pair }}">
+              <fieldset class="form-group">
+                <div class="form-check">
+                  <label class="form-check-label">
+                    <input type="radio" class="form-check-input" name="direction" value="up" checked="">
+                      <span style="color: lightgreen;">&#8639;</span>upstream alert
+                  </label>
+                </div>
+                <div class="form-check">
+                  <label class="form-check-label">
+                    <input type="radio" class="form-check-input" name="direction" value="down">
+                      <span style="color: red;">&#8643;</span>downward alert
+                  </label>
+                </div>
+              </fieldset>
+              <div class="input-group mb-3">
+                <input name="alert_val" class="form-control form-control-sm" min="0.00000001" step="any" type="number" required>
+              </div>
+                <input style="margin-left: 90px;" type="submit" value="Set Alert" class="btn btn-secondary">
+            </form>
+
           </div>
         </div>
       </div>
+    </div>
     {% endfor %}
     {% endif %}
     <!--end modals-->
@@ -126,44 +126,43 @@
   Notification.requestPermission(function(result){
     });
   
-    function update_values() {
-          $.getJSON($SCRIPT_ROOT + 'data',
-                  
-        function(data) {
-          {% if session_pairs_list %}
-            {% for pair in session_pairs_list %}
-              $('#price{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}]);
-              $('#modalprice{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}]);
-            {% endfor %}
-          {% endif %}
+  function update_values() {
+        $.getJSON($SCRIPT_ROOT + 'data',
+                
+    function(data) {
+      {% if session_pairs_list %}
+        {% for pair in session_pairs_list %}
+          $('#price{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}]);
+          $('#modalprice{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}]);
+        {% endfor %}
+      {% endif %}
 
-          
-          // notification if alert
-          if(data.raise_alert[0] != null){
-            showNotification();
-            location.reload();
-            }
-
-          function showNotification() {
-              Notification.requestPermission(function(result) {
-                  if (result === 'granted') {
-                  navigator.serviceWorker.ready.then(function(registration) {
-                      registration.showNotification(data.raise_alert[0] + '  REACHED ' + data.raise_alert[1], {
-                      vibrate: [200, 100, 200, 100, 200, 100, 200],
-                      tag: data.raise_alert[1],
-                      });
-                  });
-                  }
-              });
-            }         
       
-         // console.log(data)
-        });
-      };
+      // notification if alert
+      if(data.raise_alert[0] != null){
+        showNotification();
+        location.reload();
+        }
 
-      function stopTextColor() {
-        clearInterval(intervalID);
-      }
+      function showNotification() {
+        Notification.requestPermission(function(result) {
+            if (result === 'granted') {
+              navigator.serviceWorker.ready.then(function(registration) {
+                registration.showNotification(data.raise_alert[0] + '  REACHED ' + data.raise_alert[1], {
+                vibrate: [200, 100, 200, 100, 200, 100, 200],
+                tag: data.raise_alert[1],
+                });
+            });
+            }
+        });
+        }     
+      // console.log(data)
+    });
+  };
+
+  function stopTextColor() {
+    clearInterval(intervalID);
+  }
   </script>
 
   <script>
