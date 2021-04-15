@@ -1,7 +1,6 @@
 import requests
 import json
 
-
 def get_response():
 	r = requests.get('https://api.binance.com/api/v3/ticker/price')
 
@@ -11,28 +10,34 @@ def get_response():
 		response = None
 	return response
 
+def make_easy_dict(response):
+	# making dict pair:price
+	pairs_dict = {}
+	for pair in response:
+		pairs_dict[pair['symbol']] = pair['price']
 
-def write_json_file():
-	response = get_response()
-	if response:
+	return pairs_dict
 
-		# делаем дикт пара:цена для удобства
-		pairs_dict = {}
-		for pair in response:
-			pairs_dict[pair['symbol']] = pair['price']
+def write_json_file(filename, dict_tumbler=None):
 
+	if dict_tumbler:
+		pairs_dict = dict_tumbler
+	else:
+		response = get_response()
+		if response:
+			pairs_dict = make_easy_dict(response)
+
+	try:
+		with open(filename, 'w') as file:
+			json.dump(pairs_dict, file)
+	except Exception:
+		pass
+
+async def read_json_file(filename):
+	with open(filename, 'r') as file:
 		try:
-			with open('trade_pairs.json', 'w') as file:
-				json.dump(pairs_dict, file)
+			pairs_dict = json.load(file)
 		except Exception:
-			pass
-
-
-async def read_json_file():
-	with open('trade_pairs.json', 'r') as file:
-		try:
-			pairs = json.load(file)
-		except Exception:
-			pairs = None
+			pairs_dict = None
 	
-	return pairs
+	return pairs_dict

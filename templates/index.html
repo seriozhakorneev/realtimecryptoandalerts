@@ -26,7 +26,11 @@
                 <button style="font-size: 29px" type="submit" class="close text-dark">&times;</button>
               </form>
               <h5 class="alert-heading text-warning"><strong>{{ pair }}</strong></h5>
-              <p style="font-size: 20px;" id="price{{ loop.index - 1 }}">x</p>
+              <p style="font-size: 20px;">
+                <span class="text-success" id="priceup{{ loop.index - 1 }}"></span>
+                <span id="pricesame{{ loop.index - 1 }}">&#10240;</span>
+                <span  class="text-danger" id="pricedown{{ loop.index - 1 }}"></span>
+              </p>
               <button style="font-size: 23px; margin: 40px -2px ;"
               data-toggle="modal" data-target="#{{ pair }}" class="close text-dark">&#x2699;</button>
             </div>
@@ -46,7 +50,11 @@
           <div class="modal-body">
             <button style="font-size: 29px" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h5 class="modal-title text-center text-warning" style="font-size:35px;"><strong>{{ pair }}</strong></h5>
-            <h5 class="modal-title text-center" style="font-size:35px;" id="modalprice{{ loop.index - 1 }}">x</h5>
+            <h5 class="modal-title text-center" style="font-size:35px;">
+              <span class="text-success" id="modalpriceup{{ loop.index - 1 }}"></span>
+              <span id="modalpricesame{{ loop.index - 1 }}">&#10240;</span>
+              <span  class="text-danger" id="modalpricedown{{ loop.index - 1 }}"></span>
+            </h5>
 
             {% set alerts = alerts_dict.get(pair) %}
             {% if alerts %}
@@ -54,34 +62,20 @@
             <input type="hidden" name="trade_pair" value="{{ pair }}">
               {% if alerts[0] %}
               <button style="margin: 5px 55px;" type="submit" name="alert_index" value="0" class="btn btn-outline-success" title="Click to delete">
-                {{ "%.8f"|format(alerts[0]) }}
+                <span style="color: lightgreen;">&#8639;</span>{{ "%.8f"|format(alerts[0]) }}
               </button>
               {% endif %}
 
               {% if alerts[1] %}
               <button style="margin: 5px 55px;" type="submit" name="alert_index" value="1" class="btn btn-outline-danger" title="Click to delete">
-                {{ "%.8f"|format(alerts[1]) }}
+                <span style="color: red;">&#8643;</span>{{ "%.8f"|format(alerts[1]) }}
               </button>
               {% endif %}
             </form>
             {% endif %}
-
+            <br>
             <form method="POST" action="{{ url_for('add_alert') }}">
               <input type="hidden" name="trade_pair" value="{{ pair }}">
-              <fieldset class="form-group">
-                <div class="form-check">
-                  <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="direction" value="up" checked="">
-                      <span style="color: lightgreen;">&#8639;</span>upstream alert
-                  </label>
-                </div>
-                <div class="form-check">
-                  <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="direction" value="down">
-                      <span style="color: red;">&#8643;</span>downward alert
-                  </label>
-                </div>
-              </fieldset>
               <div class="input-group mb-3">
                 <input name="alert_val" class="form-control form-control-sm" min="0.00000001" step="any" type="number" required>
               </div>
@@ -107,7 +101,7 @@
                 </div>
               </form>
             </div>
-          <p>Page uses cookies files</a></p>
+          <p>Page uses cookie files</a></p>
           <p>Enable browser notifications, to receive alerts</p>
         </div>
       </div>
@@ -120,7 +114,7 @@
 </script>
 
 <script type="text/javascript">
-  var intervalID = setInterval(update_values,1000);
+  var intervalID = setInterval(update_values,2000);
 
   navigator.serviceWorker.register('sw.js');
   Notification.requestPermission(function(result){
@@ -132,8 +126,12 @@
     function(data) {
       {% if session_pairs_list %}
         {% for pair in session_pairs_list %}
-          $('#price{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}]);
-          $('#modalprice{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}]);
+          $('#priceup{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}][0]);
+          $('#pricesame{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}][1]);
+          $('#pricedown{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}][2]);
+          $('#modalpriceup{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}][0]);
+          $('#modalpricesame{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}][1]);
+          $('#modalpricedown{{ loop.index - 1 }}').text(data.result[{{ loop.index - 1 }}][2]);
         {% endfor %}
       {% endif %}
 
@@ -163,15 +161,7 @@
   function stopTextColor() {
     clearInterval(intervalID);
   }
-  </script>
-
-  <script>
-    {% if session_pairs_list %}
-      {% for pair in session_pairs_list %}
-        document.getElementById("price{{ loop.index - 1 }}").innerHTML;
-      {% endfor %}
-    {% endif %}
-  </script>
+  </script>  
 
   <script>
     function validateForm() {
@@ -192,9 +182,7 @@
   <script src="{{ url_for('static', path='style/js/custom.js') }}"></script>
 
   <datalist id="trade_pairs">
-    {% for p_name in p_names %}
-    <option value="{{ p_name }}">
-    {% endfor %}
+    {{ p_names|safe }}
   </datalist>
 
 </body>

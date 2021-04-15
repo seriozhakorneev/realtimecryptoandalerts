@@ -23,6 +23,18 @@ def control_cookie_size(cookie_string):
 
     return False
 
+def get_price_direction(result ,new_price, old_price):
+    # price color depends on position in list  
+    if new_price == old_price:
+        result.append([None, new_price, None])
+    elif new_price > old_price:
+        result.append([new_price, None, None])
+    elif new_price < old_price:
+        result.append([None, None, new_price])
+    
+    return result
+
+
 def check_alerts(alerts_dict, price, s_pair):
     # return alert and change alert_values
     alert_values = alerts_dict[s_pair]
@@ -44,7 +56,7 @@ def check_alerts(alerts_dict, price, s_pair):
 @repeat_every(seconds=1)
 def make_api_request_and_save_tokens():
     try:
-        api.write_json_file()
+        api.write_json_file('trade_pairs.json')
     except Exception:
         pass
 
@@ -58,11 +70,15 @@ async def home(request: Request):
     alerts_dict = {}
     p_names = []
     # read prices file
-    pairs = await api.read_json_file()
+    pairs = await api.read_json_file('trade_pairs.json')
     
+    # html of all pair names for <datalist/>
     if pairs:
-        # list of all pair names for <datalist/>
-        p_names = pairs.keys()
+        p_keys = pairs.keys()
+        p_names = ''
+        for key in p_keys:
+            p_names += f'<option value="{key}">'
+        
     if session_pairs:
         # str to list
         session_pairs_list = session_pairs.split(" ")
@@ -80,7 +96,7 @@ async def home(request: Request):
 
 @app.get("/sw.js")
 async def sw():
-    # sw.js file for Service Worker
+    # sw.js file for Service Worker(browser notifications)
     return FileResponse('templates/sw.js', media_type='application/javascript')
 
 
@@ -88,7 +104,8 @@ async def sw():
 async def data(request: Request,response: Response,):
     result = []
     raise_alert = [None]
-    pairs = await api.read_json_file()
+    pairs = await api.read_json_file('trade_pairs.json')
+    pairs_old = await api.read_json_file('trade_pairs_old.json')
     session_pairs = request.cookies.get('pairs')
     alerts = request.cookies.get('alerts')
     
@@ -96,14 +113,16 @@ async def data(request: Request,response: Response,):
         session_pairs_list = session_pairs.split(" ")
         # get pairs prices
         for s_pair in session_pairs_list:
-            price = pairs.get(s_pair)
-            result.append(price)
 
+            new_price = pairs.get(s_pair)
+            old_price = pairs_old.get(s_pair)
+            result = get_price_direction(result, new_price, old_price)
+                
             # alerts
             if alerts:
                 alerts_dict = literal_eval(alerts)
                 if s_pair in alerts_dict.keys():
-                    raise_alert = check_alerts(alerts_dict, price, s_pair)
+                    raise_alert = check_alerts(alerts_dict, new_price, s_pair)
 
                     # if alert raised, change cookie
                     if raise_alert[0]:
@@ -116,6 +135,10 @@ async def data(request: Request,response: Response,):
                             value=str(alerts_dict),
                             expires=1209600)
                             # 2 weeks in seconds
+
+    # rewrite old pairs prices
+    api.write_json_file('trade_pairs_old.json', pairs)
+
     return {
          'result': result,
          'raise_alert': raise_alert,
@@ -150,8 +173,7 @@ async def add_pair(request: Request, trade_pair: str = Form(...)):
 async def add_alert(
     request: Request,
     trade_pair: str = Form(...),
-    alert_val: float = Form(...),
-    direction: str = Form(...)):
+    alert_val: float = Form(...)):
 
     values = [None, None]
     alerts_dict = {}
@@ -160,11 +182,16 @@ async def add_alert(
     if control_cookie_size(req_alerts):
         return "Your cookies reached their limit of 4kb."
 
-    # radiobutton index for values list
-    if direction == "up":
+    pairs_old = await api.read_json_file('trade_pairs_old.json')
+    old_price = pairs_old.get(trade_pair)
+    
+    # get alert direction
+    if alert_val > float(old_price):
         a_index = 0
-    elif direction == "down":
+    elif alert_val < float(old_price):
         a_index = 1
+    elif alert_val == float(old_price):
+        return 'Alert cant be equal to current value'
     
     if req_alerts:
         alerts_dict = literal_eval(req_alerts)
