@@ -34,7 +34,6 @@ def get_price_direction(result ,new_price, old_price):
     
     return result
 
-
 def check_alerts(alerts_dict, price, s_pair):
     # return alert and change alert_values
     alert_values = alerts_dict[s_pair]
@@ -52,6 +51,14 @@ def check_alerts(alerts_dict, price, s_pair):
     return [None]
 
 # routes
+@app.on_event("startup")
+def create_old_pairs():
+    try:
+        api.write_json_file('trade_pairs_old.json')
+    except Exception:
+        pass
+
+
 @app.on_event("startup")
 @repeat_every(seconds=1)
 def make_api_request_and_save_tokens():
@@ -106,6 +113,7 @@ async def data(request: Request,response: Response,):
     raise_alert = [None]
     pairs = await api.read_json_file('trade_pairs.json')
     pairs_old = await api.read_json_file('trade_pairs_old.json')
+
     session_pairs = request.cookies.get('pairs')
     alerts = request.cookies.get('alerts')
     
