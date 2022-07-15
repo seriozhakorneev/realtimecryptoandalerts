@@ -52,9 +52,10 @@ def check_alerts(alerts_dict, price, s_pair):
 
 # routes
 @app.on_event("startup")
-def create_old_pairs():
+def create_files():
     try:
         api.write_json_file('trade_pairs_old.json')
+        api.write_json_file('trade_pairs.json')
     except Exception:
         pass
 
@@ -155,7 +156,6 @@ async def data(request: Request,response: Response,):
 
 @app.post("/add_pair")
 async def add_pair(request: Request, trade_pair: str = Form(...)):
-    
     session_pairs = request.cookies.get('pairs')
 
     if control_cookie_size(session_pairs):
@@ -218,7 +218,6 @@ async def add_alert(
 
 @app.post("/delete_pair")
 async def delete_pair(request: Request, trade_pair: str = Form(...)):
-    
     session_pairs = request.cookies.get('pairs')
     redirect_resp = RedirectResponse('/', status_code=303)
 
