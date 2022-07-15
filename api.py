@@ -3,7 +3,6 @@ import json
 
 def get_response():
 	r = requests.get('https://api.binance.com/api/v3/ticker/price')
-
 	if r.status_code == 200:
 		response = r.json()
 	else:
@@ -19,7 +18,6 @@ def make_easy_dict(response):
 	return pairs_dict
 
 def write_json_file(filename, dict_tumbler=None):
-
 	if dict_tumbler:
 		pairs_dict = dict_tumbler
 	else:
